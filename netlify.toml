@@ -5,20 +5,12 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# Next.js plugin handles everything automatically
 [[plugins]]
   package = "@netlify/plugin-nextjs"
 
-# Environment variables (set these in Netlify dashboard for secrets)
-# SERPAPI_KEY = "your_key"
-# TAVILY_API_KEY = "your_key"  
-# OPENAI_API_KEY = "your_key"
-
-# Function timeout (default is 10s, increase for web scraping)
 [functions]
   node_bundler = "esbuild"
-  
-# Headers for security
+
 [[headers]]
   for = "/*"
   [headers.values]

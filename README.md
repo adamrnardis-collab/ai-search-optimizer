@@ -1,262 +1,231 @@
-# AI Search Optimizer
+# AI Search Optimizer Pro
 
-A local MVP web app that demonstrates **AI Search Optimization** for LLMs. Given a user question, the system searches the web, selects relevant pages, extracts evidence, and produces:
+A SaaS web app that analyzes websites for AI search readiness and provides actionable recommendations to improve visibility in LLM-powered search engines like ChatGPT, Perplexity, and Claude.
 
-1. **A cited answer** - grounded in the sources with numbered citations
-2. **AI Search Optimization tips** - actionable recommendations for how websites can improve their visibility in LLM-powered search
+## Features
 
-![Screenshot](https://via.placeholder.com/800x400?text=AI+Search+Optimizer+Screenshot)
+### Free Tier
+- 3 URL scans per month
+- Basic report with overall score and grade
+- Top 3 recommendations preview
+- Category breakdown
 
-## 🚀 Quick Start
+### Pro Tier (£19/month)
+- Unlimited URL scans
+- Full detailed reports with all recommendations
+- Code examples for every fix
+- PDF export
+- Competitor comparison (coming soon)
+- Priority support
 
-### Prerequisites
+## Tech Stack
 
-- Node.js 18+ installed ([download](https://nodejs.org/))
-- npm (comes with Node.js)
+- **Framework**: Next.js 14 (App Router)
+- **Auth**: Clerk
+- **Payments**: Stripe
+- **Styling**: Tailwind CSS
+- **PDF**: jsPDF
+- **Deployment**: Netlify
 
-### One-Command Setup
+## Quick Start
+
+### 1. Clone & Install
 
 ```bash
-# Clone or download the project, then:
-cd ai-search-optimizer
+git clone <your-repo>
+cd ai-search-optimizer-pro
 npm install
+```
+
+### 2. Set Up Clerk (Authentication)
+
+1. Go to [clerk.com](https://clerk.com) and create an account
+2. Create a new application
+3. Copy your API keys from the dashboard
+
+### 3. Set Up Stripe (Payments)
+
+1. Go to [stripe.com](https://stripe.com) and create an account
+2. Get your API keys from Developers → API keys
+3. Create a product:
+   - Go to Products → Add product
+   - Name: "Pro Plan"
+   - Price: £19/month (recurring)
+   - Copy the Price ID (starts with `price_`)
+
+4. Set up webhooks:
+   - Go to Developers → Webhooks
+   - Add endpoint: `https://your-domain.com/api/webhooks/stripe`
+   - Select events: `checkout.session.completed`, `customer.subscription.deleted`, `customer.subscription.updated`
+   - Copy the webhook signing secret
+
+### 4. Configure Environment
+
+```bash
+cp .env.example .env.local
+```
+
+Fill in your values:
+
+```env
+# Clerk
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_xxxxx
+CLERK_SECRET_KEY=sk_test_xxxxx
+
+# Stripe
+STRIPE_SECRET_KEY=sk_test_xxxxx
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_xxxxx
+STRIPE_WEBHOOK_SECRET=whsec_xxxxx
+STRIPE_PRO_PRICE_ID=price_xxxxx
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+### 5. Run Locally
+
+```bash
 npm run dev
 ```
 
-Then open **http://localhost:3000** in your browser.
+Open [http://localhost:3000](http://localhost:3000)
 
-That's it! The app works immediately with **no API keys required**.
-
-## 📋 Features
-
-### Core Functionality
-
-- **Web Search** - Uses DuckDuckGo (free, no API key) with optional SerpAPI/Tavily support
-- **Content Extraction** - Fetches pages, extracts main content using Readability algorithm
-- **Evidence Ranking** - BM25 algorithm ranks most relevant snippets for the query
-- **Answer Synthesis** - Generates cited answers (template-based or AI-powered with OpenAI)
-- **Optimization Analysis** - Analyzes page quality signals and generates actionable tips
-
-### Quality Features
-
-- **Caching** - In-memory cache prevents redundant fetches (5-minute TTL)
-- **Rate Limiting** - Basic protection against abuse (10 requests/minute)
-- **Error Handling** - Graceful degradation with informative error messages
-- **Loading States** - Clear feedback during processing
-
-## 🔧 Configuration
-
-### Optional API Keys
-
-The app works without any API keys, but you can enhance it:
-
-Create a `.env.local` file (copy from `.env.example`):
-
-```env
-# Better search quality (choose one):
-SERPAPI_KEY=your_serpapi_key     # 100 free searches/month
-TAVILY_API_KEY=your_tavily_key   # 1000 free searches/month
-
-# AI-powered answer synthesis:
-OPENAI_API_KEY=your_openai_key   # For GPT-based answers
-```
-
-### Environment Variables
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `CACHE_TTL` | 300 | Cache time-to-live in seconds |
-| `MAX_CONCURRENT_FETCHES` | 3 | Max parallel page fetches |
-| `FETCH_TIMEOUT` | 10000 | Request timeout in milliseconds |
-
-## 📖 How It Works
-
-### Pipeline
-
-```
-User Question
-     ↓
-┌─────────────────┐
-│  Web Search     │  DuckDuckGo / SerpAPI / Tavily
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│  Fetch Pages    │  Parallel with rate limiting
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│  Extract Text   │  Readability algorithm
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│  Rank Evidence  │  BM25 scoring
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│  Synthesize     │  Template or GPT
-└────────┬────────┘
-         ↓
-┌─────────────────┐
-│  Analyze & Tips │  Quality signals
-└────────┬────────┘
-         ↓
-    Response
-```
-
-### BM25 Ranking
-
-The app uses [BM25](https://en.wikipedia.org/wiki/Okapi_BM25), a proven information retrieval algorithm that:
-- Considers term frequency with saturation (repeated words have diminishing returns)
-- Normalizes for document length
-- Uses IDF (inverse document frequency) to weight rare terms higher
-
-### Quality Signals Analyzed
-
-| Signal | What We Check |
-|--------|---------------|
-| Structured Data | Schema.org/JSON-LD presence |
-| Metadata | Title and description quality |
-| Content Structure | Heading hierarchy |
-| Content Depth | Word count |
-| Performance | Page load time |
-| Citation Worthiness | Clear, factual statements |
-
-## 📁 Project Structure
-
-```
-ai-search-optimizer/
-├── app/
-│   ├── api/answer/route.ts   # Main API endpoint
-│   ├── page.tsx              # React UI
-│   ├── layout.tsx            # Root layout
-│   └── globals.css           # Tailwind styles
-├── lib/
-│   ├── search.ts             # Web search (DDG/SerpAPI/Tavily)
-│   ├── fetch.ts              # Page fetching & extraction
-│   ├── extract.ts            # Evidence ranking (BM25)
-│   ├── synthesize.ts         # Answer generation
-│   ├── optimize.ts           # Optimization tips
-│   ├── cache.ts              # In-memory caching
-│   └── types.ts              # TypeScript types
-├── __tests__/
-│   └── rank.test.ts          # Unit tests
-├── .env.example              # Environment template
-└── README.md
-```
-
-## 🧪 Testing
+### 6. Test Stripe Locally
 
 ```bash
-npm test
+# Install Stripe CLI
+brew install stripe/stripe-cli/stripe
+
+# Login
+stripe login
+
+# Forward webhooks to localhost
+stripe listen --forward-to localhost:3000/api/webhooks/stripe
 ```
 
-Runs Jest tests for the ranking and tokenization logic.
+Use test card: `4242 4242 4242 4242`
 
-## 📝 Example Usage
+## Deployment to Netlify
 
-### Input
+### 1. Push to GitHub
+
+```bash
+git init
+git add .
+git commit -m "Initial commit"
+git remote add origin https://github.com/YOUR_USERNAME/ai-search-optimizer-pro.git
+git push -u origin main
 ```
-Question: What are the benefits of meditation?
-Depth: 5 sources
+
+### 2. Deploy on Netlify
+
+1. Go to [app.netlify.com](https://app.netlify.com)
+2. Click "Add new site" → "Import an existing project"
+3. Select your GitHub repo
+4. Netlify auto-detects Next.js settings
+5. Add environment variables in Site settings → Environment variables
+6. Deploy!
+
+### 3. Update Stripe Webhook
+
+After deployment, update your Stripe webhook endpoint to your Netlify URL:
+`https://your-site.netlify.app/api/webhooks/stripe`
+
+## Project Structure
+
+```
+ai-search-optimizer-pro/
+├── app/
+│   ├── api/
+│   │   ├── analyze/          # URL analysis endpoint
+│   │   ├── checkout/         # Stripe checkout
+│   │   └── webhooks/stripe/  # Stripe webhooks
+│   ├── dashboard/            # Main app (protected)
+│   ├── pricing/              # Pricing page
+│   ├── sign-in/              # Clerk sign in
+│   ├── sign-up/              # Clerk sign up
+│   ├── page.tsx              # Landing page
+│   └── layout.tsx            # Root layout
+├── lib/
+│   ├── analyzer.ts           # Page analysis logic
+│   ├── stripe.ts             # Stripe utilities
+│   ├── user.ts               # User management
+│   ├── pdf.ts                # PDF generation
+│   └── utils.ts              # Helper functions
+├── middleware.ts             # Clerk auth middleware
+└── .env.example              # Environment template
 ```
 
-### Output
+## What Gets Analyzed
 
-**Answer:**
-> Based on multiple sources:
-> 
-> • Meditation can help reduce stress and anxiety levels [1]
-> 
-> • Regular practice has been shown to improve focus and concentration [2]
-> 
-> • Studies indicate meditation may help with sleep quality [3]
+The analyzer checks 50+ factors across 5 categories:
 
-**Sources:**
-1. Healthline - Benefits of Meditation (Score: 4.2)
-2. Mayo Clinic - Meditation Overview (Score: 3.8)
-3. Harvard Health - How Meditation Helps (Score: 3.5)
+| Category | Checks |
+|----------|--------|
+| **Content Structure** | Heading hierarchy, H1 usage, subheadings, FAQ sections, definitions, content length, lists |
+| **Citation Readiness** | Statistics, quotable statements, specific claims, sentence clarity, dates |
+| **Technical SEO** | Schema.org markup, meta title/description, Open Graph, canonical URL, page speed, mobile viewport, alt text |
+| **Credibility Signals** | Author info, publish date, about section, source citations, external links |
+| **AI-Specific** | Upfront answers, table of contents, summary section, no paywall, accessibility |
 
-**Optimization Tips:**
-- HIGH: Add Schema.org structured data for FAQPage
-- MEDIUM: Include more specific statistics and citations
-- LOW: Improve page load time (currently 3.2s)
+## Customization
 
-## 🗺️ Roadmap
+### Adding New Checks
 
-What to add for a real product:
+Edit `lib/analyzer.ts`:
 
-### Phase 1: Core Improvements
-- [ ] User authentication (Clerk/NextAuth)
-- [ ] Save reports to database (PostgreSQL/Prisma)
-- [ ] Better search deduplication
-- [ ] PDF report export
-
-### Phase 2: Domain Analysis
-- [ ] Domain audit mode (analyze your own site)
-- [ ] Competitor comparison
-- [ ] Historical tracking over time
-- [ ] Scheduled monitoring alerts
-
-### Phase 3: Advanced Features
-- [ ] Custom AI prompts for synthesis
-- [ ] Multi-language support
-- [ ] API access for integrations
-- [ ] Chrome extension for real-time analysis
-
-### Phase 4: Scale
-- [ ] Redis caching
-- [ ] Queue-based processing (BullMQ)
-- [ ] CDN for static assets
-- [ ] Multi-region deployment
-
-## 🛠️ Development
-
-### Key Files to Modify
-
-| Need | File |
-|------|------|
-| Change search logic | `lib/search.ts` |
-| Modify content extraction | `lib/fetch.ts` |
-| Adjust ranking algorithm | `lib/extract.ts` |
-| Customize answer format | `lib/synthesize.ts` |
-| Add new optimization tips | `lib/optimize.ts` |
-| Change UI | `app/page.tsx` |
-
-### Adding a New Search Backend
-
-1. Add your function to `lib/search.ts`:
 ```typescript
-async function searchWithNewAPI(query: string, depth: number): Promise<SearchResult[]> {
-  // Your implementation
+function checkYourNewFeature(document: Document): Check {
+  // Your logic here
+  return {
+    id: 'your-new-feature',
+    category: 'contentStructure', // or other category
+    name: 'Your New Feature',
+    passed: true,
+    score: 10,
+    maxScore: 10,
+    details: 'Description of result',
+  };
 }
 ```
 
-2. Update the `webSearch` function to check for your API key:
-```typescript
-if (process.env.NEW_API_KEY) {
-  return searchWithNewAPI(query, options.depth);
-}
-```
+Add to `runAllChecks()` function.
 
-## 📜 License
+### Changing Pricing
 
-MIT License - feel free to use this for any purpose.
+1. Update price in Stripe dashboard
+2. Update price ID in `.env.local`
+3. Update displayed price in `app/pricing/page.tsx` and `app/dashboard/page.tsx`
 
-## 🤝 Contributing
+### Adding Features
 
-Contributions welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Submit a pull request
+Common next steps:
+- Competitor comparison (analyze multiple URLs)
+- Historical tracking (save reports over time)
+- Email notifications (scan complete, subscription events)
+- API access for integrations
+- Team/agency accounts
 
-## ⚠️ Disclaimer
+## Troubleshooting
 
-This is an educational MVP demonstrating AI search optimization concepts. It:
-- Respects robots.txt where possible
-- Uses modest rate limiting
-- Does not guarantee search result accuracy
-- Should not be used for commercial scraping at scale
+### "Authentication required" error
+- Make sure Clerk keys are set correctly
+- Check middleware.ts is protecting the right routes
+
+### Stripe checkout not working
+- Verify STRIPE_PRO_PRICE_ID is a valid price ID
+- Check Stripe dashboard for errors
+- Ensure webhook secret matches
+
+### Analysis timing out
+- Some pages take longer to load
+- Try increasing timeout in analyzer
+- Check if target site blocks bots
+
+## License
+
+MIT - use for any purpose.
 
 ---
 
-Built with ❤️ to help understand how AI systems discover and cite web content.
+Built to help websites get discovered by AI. 🚀

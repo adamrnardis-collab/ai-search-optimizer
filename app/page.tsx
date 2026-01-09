@@ -1,402 +1,194 @@
-'use client';
-
-import { useState } from 'react';
+import Link from 'next/link';
+import { SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import { 
   Search, 
-  Loader2, 
-  ExternalLink, 
-  AlertCircle, 
+  BarChart3, 
+  FileText, 
+  Zap, 
   CheckCircle, 
-  Lightbulb,
-  FileText,
-  Zap,
-  TrendingUp,
-  Clock,
-  Database,
-  Code,
-  ChevronDown,
-  ChevronUp
+  ArrowRight,
+  Star,
+  Shield,
+  TrendingUp
 } from 'lucide-react';
-import type { AnswerResponse } from '@/lib/types';
 
-export default function Home() {
-  const [question, setQuestion] = useState('');
-  const [depth, setDepth] = useState<3 | 5 | 10>(5);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<AnswerResponse | null>(null);
-  const [showBestPractices, setShowBestPractices] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!question.trim()) return;
-    
-    setLoading(true);
-    setError(null);
-    setResult(null);
-
-    try {
-      const response = await fetch('/api/answer', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: question.trim(), depth }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to process request');
-      }
-
-      setResult(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
-    }
-  };
-
+export default function HomePage() {
   return (
-    <main className="min-h-screen p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        {/* Header */}
-        <header className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
-            AI Search Optimizer
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Discover how websites rank in AI-powered search. Enter a question, get a cited answer, 
-            and learn how to optimize your content for LLM visibility.
-          </p>
-        </header>
+    <div className="min-h-screen">
+      {/* Navigation */}
+      <nav className="border-b border-gray-200 dark:border-zinc-800 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-sm sticky top-0 z-50">
+        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <Search className="w-5 h-5 text-white" />
+            </div>
+            <span className="font-bold text-lg">AI Search Optimizer</span>
+          </Link>
+          
+          <div className="flex items-center gap-4">
+            <Link href="/pricing" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+              Pricing
+            </Link>
+            <SignedOut>
+              <Link href="/sign-in" className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white">
+                Sign in
+              </Link>
+              <Link href="/sign-up" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg">
+                Get Started Free
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <Link href="/dashboard" className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg">
+                Dashboard
+              </Link>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
+          </div>
+        </div>
+      </nav>
 
-        {/* Search Form */}
-        <form onSubmit={handleSubmit} className="card p-6 mb-8">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <label htmlFor="question" className="sr-only">Your question</label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  id="question"
-                  type="text"
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                  placeholder="Ask any question (e.g., 'What are the benefits of meditation?')"
-                  className="w-full pl-10 pr-4 py-3 rounded-lg border border-gray-200 dark:border-zinc-700 
-                           bg-white dark:bg-zinc-800 text-gray-900 dark:text-white
-                           focus:ring-2 focus:ring-blue-500 focus:border-transparent
-                           placeholder:text-gray-400"
-                  disabled={loading}
-                />
+      {/* Hero Section */}
+      <section className="py-20 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-full text-sm font-medium mb-6">
+            <Zap className="w-4 h-4" />
+            AI Search is the future of discovery
+          </div>
+          
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+            Get Your Website Cited by{' '}
+            <span className="text-blue-600">AI Assistants</span>
+          </h1>
+          
+          <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 max-w-2xl mx-auto">
+            Analyze your pages for AI search readiness. Get actionable recommendations 
+            to improve visibility in ChatGPT, Perplexity, Claude, and other LLM-powered search.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link href="/sign-up" className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl flex items-center justify-center gap-2">
+              Analyze Your Site Free
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+            <Link href="#features" className="px-8 py-4 border border-gray-300 dark:border-zinc-700 hover:border-gray-400 font-semibold rounded-xl">
+              See How It Works
+            </Link>
+          </div>
+          
+          <p className="text-sm text-gray-500 mt-4">
+            3 free scans per month • No credit card required
+          </p>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section id="features" className="py-20 px-4 bg-gray-50 dark:bg-zinc-900/50">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-4">How It Works</h2>
+          <p className="text-gray-600 dark:text-gray-400 text-center mb-12 max-w-2xl mx-auto">
+            Three simple steps to optimize your content for AI search engines
+          </p>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="card p-6 text-center">
+              <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Search className="w-6 h-6 text-blue-600" />
               </div>
+              <h3 className="font-semibold text-lg mb-2">1. Enter Your URL</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Paste any webpage URL and we&apos;ll analyze it for AI search readiness
+              </p>
             </div>
             
-            <div className="flex gap-3">
-              <div>
-                <label htmlFor="depth" className="sr-only">Search depth</label>
-                <select
-                  id="depth"
-                  value={depth}
-                  onChange={(e) => setDepth(Number(e.target.value) as 3 | 5 | 10)}
-                  className="h-full px-4 py-3 rounded-lg border border-gray-200 dark:border-zinc-700 
-                           bg-white dark:bg-zinc-800 text-gray-900 dark:text-white
-                           focus:ring-2 focus:ring-blue-500"
-                  disabled={loading}
-                >
-                  <option value={3}>3 sources</option>
-                  <option value={5}>5 sources</option>
-                  <option value={10}>10 sources</option>
-                </select>
+            <div className="card p-6 text-center">
+              <div className="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <BarChart3 className="w-6 h-6 text-green-600" />
               </div>
-              
-              <button
-                type="submit"
-                disabled={loading || !question.trim()}
-                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 
-                         text-white font-medium rounded-lg transition-colors
-                         flex items-center gap-2"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Searching...
-                  </>
-                ) : (
-                  <>
-                    <Search className="w-5 h-5" />
-                    Search & Answer
-                  </>
-                )}
-              </button>
+              <h3 className="font-semibold text-lg mb-2">2. Get Your Score</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                See your AI readiness score across 5 key categories with 50+ checks
+              </p>
+            </div>
+            
+            <div className="card p-6 text-center">
+              <div className="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mx-auto mb-4">
+                <FileText className="w-6 h-6 text-purple-600" />
+              </div>
+              <h3 className="font-semibold text-lg mb-2">3. Fix & Improve</h3>
+              <p className="text-gray-600 dark:text-gray-400 text-sm">
+                Follow prioritized recommendations with code examples to boost visibility
+              </p>
             </div>
           </div>
-        </form>
+        </div>
+      </section>
 
-        {/* Error Message */}
-        {error && (
-          <div className="card p-4 mb-8 border-red-200 dark:border-red-900 bg-red-50 dark:bg-red-900/20">
-            <div className="flex items-center gap-3 text-red-700 dark:text-red-400">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <p>{error}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Loading State */}
-        {loading && (
-          <div className="card p-8 text-center">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">
-              Searching the web, analyzing content, and generating insights...
-            </p>
-            <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
-              This may take 10-30 seconds depending on source availability
-            </p>
-          </div>
-        )}
-
-        {/* Results */}
-        {result && !loading && (
-          <div className="space-y-6">
-            {/* Meta Info Bar */}
-            <div className="flex flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
-              <span className="flex items-center gap-1">
-                <Database className="w-4 h-4" />
-                {result.meta.searchBackend.charAt(0).toUpperCase() + result.meta.searchBackend.slice(1)}
-              </span>
-              <span className="flex items-center gap-1">
-                <FileText className="w-4 h-4" />
-                {result.meta.sourcesFetched}/{result.meta.sourcesSearched} sources analyzed
-              </span>
-              <span className="flex items-center gap-1">
-                <Clock className="w-4 h-4" />
-                {(result.meta.processingTime / 1000).toFixed(1)}s
-              </span>
-              {result.meta.cached && (
-                <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                  <Zap className="w-4 h-4" />
-                  Cached
-                </span>
-              )}
-            </div>
-
-            {/* Answer Panel */}
-            <section className="card p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  Answer
-                </h2>
-                <span className={`text-sm font-medium confidence-${result.answer.confidence}`}>
-                  {result.answer.confidence.charAt(0).toUpperCase() + result.answer.confidence.slice(1)} confidence
-                </span>
-              </div>
-              
-              <div className="prose dark:prose-invert max-w-none answer-text">
-                <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
-                  {result.answer.text}
-                </p>
-              </div>
-
-              {result.answer.citations.length > 0 && (
-                <div className="mt-6 pt-4 border-t border-gray-200 dark:border-zinc-700">
-                  <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-3">
-                    Citations
-                  </h3>
-                  <div className="space-y-2">
-                    {result.answer.citations.map((citation) => (
-                      <a
-                        key={citation.index}
-                        href={citation.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-start gap-2 text-sm text-blue-600 dark:text-blue-400 hover:underline"
-                      >
-                        <span className="font-medium">[{citation.index}]</span>
-                        <span className="line-clamp-1">{citation.title}</span>
-                        <ExternalLink className="w-3 h-3 flex-shrink-0 mt-1" />
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </section>
-
-            {/* Sources Panel */}
-            <section className="card p-6">
-              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-blue-600" />
-                Sources Analyzed
-              </h2>
-              
-              <div className="space-y-4">
-                {result.sources.map((source) => (
-                  <div 
-                    key={source.index}
-                    className="p-4 rounded-lg bg-gray-50 dark:bg-zinc-800/50 border border-gray-100 dark:border-zinc-700"
-                  >
-                    <div className="flex items-start justify-between gap-4 mb-2">
-                      <div className="min-w-0 flex-1">
-                        <a
-                          href={source.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-blue-600 dark:text-blue-400 hover:underline font-medium flex items-center gap-1"
-                        >
-                          [{source.index}] {source.title || 'Untitled'}
-                          <ExternalLink className="w-3 h-3 flex-shrink-0" />
-                        </a>
-                        <p className="text-xs text-gray-500 dark:text-gray-500 truncate">
-                          {source.url}
-                        </p>
-                      </div>
-                      <div className="text-right flex-shrink-0">
-                        <div className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                          Score: {source.relevanceScore.toFixed(2)}
-                        </div>
-                      </div>
-                    </div>
-                    
-                    {source.topSnippet && (
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 line-clamp-3">
-                        &ldquo;{source.topSnippet}&rdquo;
-                      </p>
-                    )}
-                    
-                    <div className="flex flex-wrap gap-2 mt-3">
-                      {source.qualitySignals.hasStructuredData && (
-                        <span className="px-2 py-0.5 text-xs rounded bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
-                          Schema.org
-                        </span>
-                      )}
-                      {source.qualitySignals.hasGoodMetadata && (
-                        <span className="px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                          Good Meta
-                        </span>
-                      )}
-                      {source.qualitySignals.hasHeadings && (
-                        <span className="px-2 py-0.5 text-xs rounded bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400">
-                          Structured
-                        </span>
-                      )}
-                      <span className="px-2 py-0.5 text-xs rounded bg-gray-100 text-gray-700 dark:bg-zinc-700 dark:text-gray-300">
-                        {source.qualitySignals.wordCount} words
-                      </span>
-                      <span className="px-2 py-0.5 text-xs rounded bg-gray-100 text-gray-700 dark:bg-zinc-700 dark:text-gray-300">
-                        {source.qualitySignals.loadTime}ms
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </section>
-
-            {/* Optimization Tips Panel */}
-            <section className="card p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-gray-900 dark:text-white flex items-center gap-2">
-                  <Lightbulb className="w-5 h-5 text-yellow-500" />
-                  AI Search Optimization Tips
-                </h2>
-                <div className="flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-600 dark:text-gray-400">
-                    Overall Score: <span className="font-semibold">{result.optimization.overallScore}/100</span>
-                  </span>
-                </div>
-              </div>
-
-              {result.optimization.tips.length > 0 ? (
-                <div className="space-y-4">
-                  {result.optimization.tips.map((tip, index) => (
-                    <div 
-                      key={index}
-                      className="p-4 rounded-lg bg-gray-50 dark:bg-zinc-800/50 border border-gray-100 dark:border-zinc-700"
-                    >
-                      <div className="flex items-start gap-3">
-                        <span className={`px-2 py-0.5 text-xs font-medium rounded flex-shrink-0 badge-${tip.priority}`}>
-                          {tip.priority.toUpperCase()}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
-                              {tip.category}
-                            </span>
-                          </div>
-                          <h3 className="font-medium text-gray-900 dark:text-white mb-1">
-                            {tip.issue}
-                          </h3>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">
-                            {tip.recommendation}
-                          </p>
-                          {tip.example && (
-                            <div className="mt-3">
-                              <div className="flex items-center gap-1 text-xs text-gray-500 dark:text-gray-400 mb-1">
-                                <Code className="w-3 h-3" />
-                                Example
-                              </div>
-                              <pre className="text-xs bg-gray-100 dark:bg-zinc-800 p-3 rounded overflow-x-auto">
-                                {tip.example}
-                              </pre>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+      {/* What We Check */}
+      <section className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl font-bold text-center mb-4">What We Analyze</h2>
+          <p className="text-gray-600 dark:text-gray-400 text-center mb-12 max-w-2xl mx-auto">
+            We check 50+ factors that influence how AI systems discover and cite your content
+          </p>
+          
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[
+              { title: 'Content Structure', items: ['Heading hierarchy', 'FAQ sections', 'Clear definitions', 'Proper formatting'] },
+              { title: 'Citation Readiness', items: ['Quotable statements', 'Statistics & data', 'Specific claims', 'Clear sentences'] },
+              { title: 'Technical SEO', items: ['Schema.org markup', 'Meta tags', 'Page speed', 'Mobile friendly'] },
+              { title: 'Credibility Signals', items: ['Author information', 'Publish dates', 'Source citations', 'About page'] },
+              { title: 'AI-Specific Factors', items: ['Upfront answers', 'Key takeaways', 'Table of contents', 'Accessibility'] },
+              { title: 'Competitive Edge', items: ['vs. competitor analysis', 'Gap identification', 'Industry benchmarks', 'Priority ranking'] },
+            ].map((category, i) => (
+              <div key={i} className="card p-6">
+                <h3 className="font-semibold mb-3">{category.title}</h3>
+                <ul className="space-y-2">
+                  {category.items.map((item, j) => (
+                    <li key={j} className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      {item}
+                    </li>
                   ))}
-                </div>
-              ) : (
-                <p className="text-gray-500 dark:text-gray-400">
-                  No specific issues found. The analyzed sources follow good practices.
-                </p>
-              )}
-
-              {/* Best Practices Accordion */}
-              <div className="mt-6 pt-4 border-t border-gray-200 dark:border-zinc-700">
-                <button
-                  onClick={() => setShowBestPractices(!showBestPractices)}
-                  className="flex items-center justify-between w-full text-left"
-                >
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    General Best Practices for AI Search Optimization
-                  </h3>
-                  {showBestPractices ? (
-                    <ChevronUp className="w-4 h-4 text-gray-400" />
-                  ) : (
-                    <ChevronDown className="w-4 h-4 text-gray-400" />
-                  )}
-                </button>
-                
-                {showBestPractices && (
-                  <ul className="mt-4 space-y-2">
-                    {result.optimization.bestPractices.map((practice, index) => (
-                      <li 
-                        key={index}
-                        className="flex items-start gap-2 text-sm text-gray-600 dark:text-gray-400"
-                      >
-                        <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0 mt-0.5" />
-                        {practice}
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                </ul>
               </div>
-            </section>
+            ))}
           </div>
-        )}
+        </div>
+      </section>
 
-        {/* Footer */}
-        <footer className="mt-12 pt-8 border-t border-gray-200 dark:border-zinc-800 text-center text-sm text-gray-500 dark:text-gray-400">
-          <p>
-            AI Search Optimizer MVP • Built to demonstrate LLM search optimization concepts
+      {/* CTA */}
+      <section className="py-20 px-4 bg-blue-600">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl font-bold text-white mb-4">
+            Ready to Get Cited by AI?
+          </h2>
+          <p className="text-blue-100 mb-8 max-w-2xl mx-auto">
+            Join thousands of websites optimizing for the next generation of search. Start with 3 free scans.
           </p>
-          <p className="mt-1">
-            Uses DuckDuckGo for search • No paid APIs required for core functionality
-          </p>
-        </footer>
-      </div>
-    </main>
+          <Link href="/sign-up" className="inline-flex items-center gap-2 px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl hover:bg-blue-50">
+            Start Free Analysis
+            <ArrowRight className="w-5 h-5" />
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 px-4 border-t border-gray-200 dark:border-zinc-800">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 bg-blue-600 rounded flex items-center justify-center">
+              <Search className="w-4 h-4 text-white" />
+            </div>
+            <span className="font-semibold">AI Search Optimizer</span>
+          </div>
+          <div className="flex gap-6 text-sm text-gray-600 dark:text-gray-400">
+            <Link href="/pricing" className="hover:text-gray-900 dark:hover:text-white">Pricing</Link>
+            <Link href="#" className="hover:text-gray-900 dark:hover:text-white">Privacy</Link>
+            <Link href="#" className="hover:text-gray-900 dark:hover:text-white">Terms</Link>
+          </div>
+          <p className="text-sm text-gray-500">© 2024 AI Search Optimizer</p>
+        </div>
+      </footer>
+    </div>
   );
 }
