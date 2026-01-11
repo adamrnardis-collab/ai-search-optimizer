@@ -1,0 +1,40 @@
+{
+  "name": "ai-search-optimizer-pro",
+  "version": "1.0.0",
+  "description": "Analyze and optimize your website for AI search visibility",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "test": "jest",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "next": "^14.2.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@clerk/nextjs": "^4.29.0",
+    "stripe": "^14.21.0",
+    "@stripe/stripe-js": "^3.0.0",
+    "jsdom": "^24.0.0",
+    "@mozilla/readability": "^0.5.0",
+    "jspdf": "^2.5.1",
+    "lucide-react": "^0.372.0",
+    "clsx": "^2.1.0",
+    "tailwind-merge": "^2.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "@types/jsdom": "^21.1.6",
+    "typescript": "^5.4.0",
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.12",
+    "ts-jest": "^29.1.2",
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0"
+  }
+}
