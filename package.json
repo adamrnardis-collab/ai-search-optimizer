@@ -1,7 +1,7 @@
 {
   "name": "ai-search-optimizer-pro",
-  "version": "1.0.0",
-  "description": "Analyze and optimize your website for AI search visibility",
+  "version": "2.0.0",
+  "description": "AI-powered website analyzer for AI search optimization",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -14,9 +14,8 @@
     "next": "^14.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "@anthropic-ai/sdk": "^0.52.0",
     "@clerk/nextjs": "^4.29.0",
-    "stripe": "^14.21.0",
-    "@stripe/stripe-js": "^3.0.0",
     "jsdom": "^24.0.0",
     "@mozilla/readability": "^0.5.0",
     "jspdf": "^2.5.1",

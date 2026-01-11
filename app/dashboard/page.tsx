@@ -8,13 +8,9 @@ import {
   AlertCircle, 
   CheckCircle,
   XCircle,
-  Download,
-  Lock,
-  Zap,
   ExternalLink,
   ChevronDown,
   ChevronUp,
-  Crown,
   MessageSquareQuote,
   HelpCircle,
   Target,
@@ -23,7 +19,12 @@ import {
   Users,
   BookOpen,
   AlertTriangle,
-  Sparkles
+  Sparkles,
+  Brain,
+  FileEdit,
+  TrendingUp,
+  MessageCircle,
+  Wand2
 } from 'lucide-react';
 import type { AnalysisResult } from '@/lib/analyzer';
 
@@ -32,10 +33,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'insights' | 'recommendations'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'ai-analysis' | 'improvements' | 'citations'>('overview');
 
   useEffect(() => {
     setMounted(true);
@@ -71,20 +70,6 @@ export default function DashboardPage() {
     }
   };
 
-  const handleDownloadPDF = async () => {
-    setShowUpgradeModal(true);
-  };
-
-  const toggleCategory = (category: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(category)) {
-      newExpanded.delete(category);
-    } else {
-      newExpanded.add(category);
-    }
-    setExpandedCategories(newExpanded);
-  };
-
   const getGradeColor = (grade: string) => {
     const colors: Record<string, string> = {
       'A': 'bg-green-500',
@@ -105,22 +90,23 @@ export default function DashboardPage() {
     return colors[status] || 'text-gray-600';
   };
 
-  const getConfidenceColor = (confidence: string) => {
+  const getPriorityColor = (priority: string) => {
     const colors: Record<string, string> = {
-      'high': 'bg-green-100 text-green-700 border-green-200',
+      'critical': 'bg-red-100 text-red-700 border-red-200',
+      'high': 'bg-orange-100 text-orange-700 border-orange-200',
       'medium': 'bg-yellow-100 text-yellow-700 border-yellow-200',
-      'low': 'bg-gray-100 text-gray-600 border-gray-200',
+      'low': 'bg-blue-100 text-blue-700 border-blue-200',
     };
-    return colors[confidence] || 'bg-gray-100 text-gray-600';
+    return colors[priority] || 'bg-gray-100 text-gray-600';
   };
 
-  const getStrengthColor = (strength: string) => {
+  const getConfidenceColor = (confidence: string) => {
     const colors: Record<string, string> = {
-      'strong': 'border-l-green-500 bg-green-50',
-      'medium': 'border-l-yellow-500 bg-yellow-50',
-      'weak': 'border-l-red-500 bg-red-50',
+      'high': 'bg-green-100 text-green-700',
+      'medium': 'bg-yellow-100 text-yellow-700',
+      'low': 'bg-gray-100 text-gray-600',
     };
-    return colors[strength] || 'border-l-gray-500 bg-gray-50';
+    return colors[confidence] || 'bg-gray-100 text-gray-600';
   };
 
   if (!mounted) {
@@ -143,9 +129,10 @@ export default function DashboardPage() {
             <span className="font-bold text-lg">AI Search Optimizer</span>
           </Link>
           
-          <span className="px-3 py-1 bg-yellow-100 text-yellow-800 text-xs font-medium rounded-full">
-            Demo Mode
-          </span>
+          <div className="flex items-center gap-2">
+            <Brain className="w-4 h-4 text-purple-600" />
+            <span className="text-sm text-purple-600 font-medium">Powered by Claude AI</span>
+          </div>
         </div>
       </header>
 
@@ -172,21 +159,25 @@ export default function DashboardPage() {
             <button
               type="submit"
               disabled={loading || !url.trim()}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-medium rounded-lg flex items-center justify-center gap-2 min-w-[150px]"
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-medium rounded-lg flex items-center justify-center gap-2 min-w-[180px]"
             >
               {loading ? (
                 <>
                   <Loader2 className="w-5 h-5 animate-spin" />
-                  Analyzing...
+                  Analyzing with AI...
                 </>
               ) : (
                 <>
-                  <Sparkles className="w-5 h-5" />
-                  Analyze
+                  <Wand2 className="w-5 h-5" />
+                  Analyze with Claude
                 </>
               )}
             </button>
           </form>
+          <p className="text-xs text-gray-500 mt-3 flex items-center gap-1">
+            <Brain className="w-3 h-3" />
+            Claude AI analyzes your content and simulates how AI assistants will cite it
+          </p>
         </div>
 
         {/* Error */}
@@ -202,11 +193,21 @@ export default function DashboardPage() {
         {/* Loading */}
         {loading && (
           <div className="card p-12 text-center">
-            <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-            <p className="text-gray-600 dark:text-gray-400">
-              Analyzing your page for AI search readiness...
+            <div className="relative w-16 h-16 mx-auto mb-4">
+              <Loader2 className="w-16 h-16 animate-spin text-blue-600" />
+              <Brain className="w-6 h-6 text-purple-600 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+            </div>
+            <p className="text-gray-600 dark:text-gray-400 font-medium">
+              Claude is analyzing your page...
             </p>
-            <p className="text-sm text-gray-500 mt-2">This usually takes 5-15 seconds</p>
+            <p className="text-sm text-gray-500 mt-2">
+              Simulating AI citations, identifying improvements, and generating recommendations
+            </p>
+            <div className="flex justify-center gap-2 mt-4">
+              <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded">Fetching content</span>
+              <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded">AI analysis</span>
+              <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded">Generating insights</span>
+            </div>
           </div>
         )}
 
@@ -217,8 +218,8 @@ export default function DashboardPage() {
             <div className="card p-6">
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div className="flex items-center gap-6">
-                  <div className={`w-24 h-24 ${getGradeColor(result.grade)} rounded-2xl flex flex-col items-center justify-center text-white`}>
-                    <span className="text-4xl font-bold">{result.score}</span>
+                  <div className={`w-28 h-28 ${getGradeColor(result.grade)} rounded-2xl flex flex-col items-center justify-center text-white shadow-lg`}>
+                    <span className="text-5xl font-bold">{result.score}</span>
                     <span className="text-sm opacity-90">Grade {result.grade}</span>
                   </div>
                   <div>
@@ -232,61 +233,83 @@ export default function DashboardPage() {
                       <span>•</span>
                       <span>{(result.metadata.loadTime / 1000).toFixed(1)}s load</span>
                       <span>•</span>
-                      <span title={result.metadata.readabilityGrade}>
-                        Readability: {result.metadata.readabilityScore}/100
-                      </span>
+                      <span>Readability: {result.metadata.readabilityScore}/100</span>
+                    </div>
+                    {result.aiAnalysis && (
+                      <div className="mt-3 flex items-center gap-2">
+                        <Brain className="w-4 h-4 text-purple-600" />
+                        <span className="text-sm text-purple-600 font-medium">AI-Powered Analysis</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              {/* AI Summary */}
+              {result.aiAnalysis?.summary && (
+                <div className="mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <Brain className="w-5 h-5 text-purple-600 mt-0.5" />
+                    <div>
+                      <h3 className="font-medium text-purple-900 dark:text-purple-100 mb-1">Claude&apos;s Assessment</h3>
+                      <p className="text-sm text-gray-700 dark:text-gray-300">{result.aiAnalysis.summary}</p>
                     </div>
                   </div>
                 </div>
-                
-                <button
-                  onClick={handleDownloadPDF}
-                  className="flex items-center gap-2 px-4 py-2 rounded-lg font-medium bg-gray-100 text-gray-500 cursor-not-allowed"
-                >
-                  <Lock className="w-4 h-4" />
-                  Download PDF
-                </button>
-              </div>
+              )}
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex gap-2 border-b border-gray-200 dark:border-zinc-800">
+            <div className="flex gap-1 bg-gray-100 dark:bg-zinc-800 p-1 rounded-lg">
               <button
                 onClick={() => setActiveTab('overview')}
-                className={`px-4 py-2 font-medium text-sm border-b-2 -mb-px transition-colors ${
+                className={`flex-1 px-4 py-2 font-medium text-sm rounded-md transition-colors flex items-center justify-center gap-2 ${
                   activeTab === 'overview' 
-                    ? 'border-blue-600 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                    ? 'bg-white dark:bg-zinc-700 text-gray-900 dark:text-white shadow' 
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
+                <TrendingUp className="w-4 h-4" />
                 Overview
               </button>
               <button
-                onClick={() => setActiveTab('insights')}
-                className={`px-4 py-2 font-medium text-sm border-b-2 -mb-px transition-colors flex items-center gap-1 ${
-                  activeTab === 'insights' 
-                    ? 'border-blue-600 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                onClick={() => setActiveTab('citations')}
+                className={`flex-1 px-4 py-2 font-medium text-sm rounded-md transition-colors flex items-center justify-center gap-2 ${
+                  activeTab === 'citations' 
+                    ? 'bg-white dark:bg-zinc-700 text-gray-900 dark:text-white shadow' 
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                <Sparkles className="w-4 h-4" />
-                AI Insights
+                <MessageSquareQuote className="w-4 h-4" />
+                Citation Simulator
               </button>
               <button
-                onClick={() => setActiveTab('recommendations')}
-                className={`px-4 py-2 font-medium text-sm border-b-2 -mb-px transition-colors ${
-                  activeTab === 'recommendations' 
-                    ? 'border-blue-600 text-blue-600' 
-                    : 'border-transparent text-gray-500 hover:text-gray-700'
+                onClick={() => setActiveTab('improvements')}
+                className={`flex-1 px-4 py-2 font-medium text-sm rounded-md transition-colors flex items-center justify-center gap-2 ${
+                  activeTab === 'improvements' 
+                    ? 'bg-white dark:bg-zinc-700 text-gray-900 dark:text-white shadow' 
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
-                Recommendations
+                <Lightbulb className="w-4 h-4" />
+                Improvements
+              </button>
+              <button
+                onClick={() => setActiveTab('ai-analysis')}
+                className={`flex-1 px-4 py-2 font-medium text-sm rounded-md transition-colors flex items-center justify-center gap-2 ${
+                  activeTab === 'ai-analysis' 
+                    ? 'bg-white dark:bg-zinc-700 text-gray-900 dark:text-white shadow' 
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                <Brain className="w-4 h-4" />
+                AI Deep Dive
               </button>
             </div>
 
             {/* Overview Tab */}
             {activeTab === 'overview' && (
-              <div className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
                 {/* Category Scores */}
                 <div className="card p-6">
                   <h3 className="font-semibold mb-4">Category Breakdown</h3>
@@ -323,317 +346,265 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Quick Stats Grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <div className="card p-4 text-center">
-                    <div className="text-2xl font-bold text-blue-600">{result.insights.questionsAnswered.length}</div>
-                    <div className="text-sm text-gray-500">Questions Answered</div>
+                {/* Content Understanding */}
+                {result.aiAnalysis?.contentUnderstanding && (
+                  <div className="card p-6">
+                    <h3 className="font-semibold mb-4 flex items-center gap-2">
+                      <Brain className="w-4 h-4 text-purple-600" />
+                      What AI Understands
+                    </h3>
+                    <div className="space-y-3">
+                      <div>
+                        <span className="text-xs text-gray-500 uppercase">Main Topic</span>
+                        <p className="font-medium">{result.aiAnalysis.contentUnderstanding.mainTopic}</p>
+                      </div>
+                      <div>
+                        <span className="text-xs text-gray-500 uppercase">Target Audience</span>
+                        <p className="font-medium">{result.aiAnalysis.contentUnderstanding.targetAudience}</p>
+                      </div>
+                      <div>
+                        <span className="text-xs text-gray-500 uppercase">Content Type</span>
+                        <p className="font-medium">{result.aiAnalysis.contentUnderstanding.contentType}</p>
+                      </div>
+                      <div>
+                        <span className="text-xs text-gray-500 uppercase">Key Messages</span>
+                        <ul className="mt-1 space-y-1">
+                          {result.aiAnalysis.contentUnderstanding.keyMessages.map((msg, i) => (
+                            <li key={i} className="text-sm flex items-start gap-2">
+                              <CheckCircle className="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" />
+                              {msg}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
-                  <div className="card p-4 text-center">
-                    <div className="text-2xl font-bold text-green-600">{result.insights.quotableSnippets.filter(s => s.strength === 'strong').length}</div>
-                    <div className="text-sm text-gray-500">Strong Quotes</div>
+                )}
+
+                {/* Competitive Analysis */}
+                {result.aiAnalysis?.competitiveAnalysis && (
+                  <div className="card p-6 md:col-span-2">
+                    <h3 className="font-semibold mb-4">Strengths & Opportunities</h3>
+                    <div className="grid md:grid-cols-3 gap-4">
+                      <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                        <h4 className="font-medium text-green-800 dark:text-green-200 mb-2 flex items-center gap-2">
+                          <CheckCircle className="w-4 h-4" />
+                          Strengths
+                        </h4>
+                        <ul className="space-y-1">
+                          {result.aiAnalysis.competitiveAnalysis.strengths.map((s, i) => (
+                            <li key={i} className="text-sm text-green-700 dark:text-green-300">• {s}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <h4 className="font-medium text-red-800 dark:text-red-200 mb-2 flex items-center gap-2">
+                          <AlertTriangle className="w-4 h-4" />
+                          Weaknesses
+                        </h4>
+                        <ul className="space-y-1">
+                          {result.aiAnalysis.competitiveAnalysis.weaknesses.map((w, i) => (
+                            <li key={i} className="text-sm text-red-700 dark:text-red-300">• {w}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                        <h4 className="font-medium text-blue-800 dark:text-blue-200 mb-2 flex items-center gap-2">
+                          <Lightbulb className="w-4 h-4" />
+                          Quick Wins
+                        </h4>
+                        <ul className="space-y-1">
+                          {result.aiAnalysis.competitiveAnalysis.opportunities.map((o, i) => (
+                            <li key={i} className="text-sm text-blue-700 dark:text-blue-300">• {o}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
-                  <div className="card p-4 text-center">
-                    <div className="text-2xl font-bold text-purple-600">{result.insights.entities.length}</div>
-                    <div className="text-sm text-gray-500">Key Entities</div>
-                  </div>
-                  <div className="card p-4 text-center">
-                    <div className="text-2xl font-bold text-orange-600">{result.insights.contentGaps.length}</div>
-                    <div className="text-sm text-gray-500">Content Gaps</div>
-                  </div>
-                </div>
+                )}
               </div>
             )}
 
-            {/* Insights Tab */}
-            {activeTab === 'insights' && (
+            {/* Citations Tab */}
+            {activeTab === 'citations' && (
               <div className="space-y-6">
-                {/* AI Citation Preview */}
-                <div className="card p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <MessageSquareQuote className="w-5 h-5 text-blue-600" />
-                    <h3 className="font-semibold">How AI Might Cite Your Content</h3>
-                  </div>
-                  <p className="text-sm text-gray-500 mb-4">
-                    Preview of how AI assistants could reference your content when answering user queries.
-                  </p>
-                  
-                  {result.insights.citationPreviews.length > 0 ? (
-                    <div className="space-y-4">
-                      {result.insights.citationPreviews.map((preview, i) => (
-                        <div key={i} className={`p-4 rounded-lg border ${getConfidenceColor(preview.confidence)}`}>
-                          <div className="flex items-start justify-between gap-2 mb-2">
-                            <div className="text-sm font-medium text-gray-700">
-                              <span className="text-gray-400">User asks:</span> &quot;{preview.query}&quot;
+                {/* Citation Simulations */}
+                {result.aiAnalysis?.citationSimulation?.sampleCitations && (
+                  <div className="card p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <MessageSquareQuote className="w-5 h-5 text-blue-600" />
+                      <h3 className="font-semibold">How AI Will Cite Your Content</h3>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-6">
+                      Claude simulated how AI assistants would respond to user queries using your content.
+                    </p>
+                    
+                    <div className="space-y-6">
+                      {result.aiAnalysis.citationSimulation.sampleCitations.map((citation, i) => (
+                        <div key={i} className="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-hidden">
+                          <div className="bg-gray-50 dark:bg-zinc-800 p-3 border-b border-gray-200 dark:border-zinc-700">
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-2">
+                                <MessageCircle className="w-4 h-4 text-gray-400" />
+                                <span className="text-sm font-medium">User asks:</span>
+                              </div>
+                              <span className={`text-xs px-2 py-0.5 rounded-full ${getConfidenceColor(citation.confidence)}`}>
+                                {citation.confidence} confidence
+                              </span>
                             </div>
-                            <span className={`text-xs px-2 py-0.5 rounded-full ${
-                              preview.confidence === 'high' ? 'bg-green-200 text-green-800' :
-                              preview.confidence === 'medium' ? 'bg-yellow-200 text-yellow-800' :
-                              'bg-gray-200 text-gray-600'
-                            }`}>
-                              {preview.confidence} confidence
-                            </span>
+                            <p className="mt-1 text-gray-700 dark:text-gray-300">&quot;{citation.userQuery}&quot;</p>
                           </div>
-                          <div className="text-sm italic text-gray-600">
-                            &quot;{preview.citation}&quot;
+                          <div className="p-4">
+                            <div className="flex items-start gap-3">
+                              <Brain className="w-5 h-5 text-purple-600 mt-1 flex-shrink-0" />
+                              <div>
+                                <span className="text-xs text-gray-500 uppercase">AI Response</span>
+                                <p className="text-sm mt-1">{citation.aiResponse}</p>
+                                {citation.citedText && (
+                                  <div className="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded border-l-4 border-yellow-400">
+                                    <span className="text-xs text-yellow-700 dark:text-yellow-300 uppercase">Quoted from your page:</span>
+                                    <p className="text-sm mt-1 italic">&quot;{citation.citedText}&quot;</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           </div>
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <Quote className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                      <p>No strong citation opportunities found. Add more specific facts and statistics.</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Questions Answered */}
-                <div className="card p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <HelpCircle className="w-5 h-5 text-purple-600" />
-                    <h3 className="font-semibold">Questions Your Content Answers</h3>
                   </div>
-                  
-                  {result.insights.questionsAnswered.length > 0 ? (
-                    <div className="grid gap-2">
-                      {result.insights.questionsAnswered.map((question, i) => (
-                        <div key={i} className="flex items-center gap-2 p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-                          <CheckCircle className="w-4 h-4 text-purple-600 flex-shrink-0" />
-                          <span className="text-sm">{question}</span>
+                )}
+
+                {/* Likely Queries */}
+                {result.aiAnalysis?.citationSimulation?.likelyQueries && (
+                  <div className="card p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <HelpCircle className="w-5 h-5 text-purple-600" />
+                      <h3 className="font-semibold">Queries Your Page Could Answer</h3>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-4">
+                      If optimized well, your page could be cited for these searches:
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {result.aiAnalysis.citationSimulation.likelyQueries.map((query, i) => (
+                        <div key={i} className="px-3 py-2 bg-purple-50 dark:bg-purple-900/20 rounded-lg text-sm text-purple-700 dark:text-purple-300">
+                          &quot;{query}&quot;
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <p className="text-gray-500 text-sm">No clear questions detected. Consider adding FAQ-style content.</p>
-                  )}
-                </div>
-
-                {/* Quotable Snippets */}
-                <div className="card p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Quote className="w-5 h-5 text-green-600" />
-                    <h3 className="font-semibold">Quotable Snippets Found</h3>
                   </div>
-                  <p className="text-sm text-gray-500 mb-4">
-                    Sentences AI is likely to extract and quote directly.
-                  </p>
-                  
-                  {result.insights.quotableSnippets.length > 0 ? (
-                    <div className="space-y-3">
-                      {result.insights.quotableSnippets.map((snippet, i) => (
-                        <div key={i} className={`p-3 border-l-4 rounded-r-lg ${getStrengthColor(snippet.strength)}`}>
-                          <div className="flex items-start justify-between gap-2">
-                            <p className="text-sm">&quot;{snippet.text}&quot;</p>
-                            <span className={`text-xs px-2 py-0.5 rounded flex-shrink-0 ${
-                              snippet.strength === 'strong' ? 'bg-green-200 text-green-800' :
-                              snippet.strength === 'medium' ? 'bg-yellow-200 text-yellow-800' :
-                              'bg-red-200 text-red-800'
-                            }`}>
-                              {snippet.type}
+                )}
+              </div>
+            )}
+
+            {/* Improvements Tab */}
+            {activeTab === 'improvements' && (
+              <div className="space-y-6">
+                {/* AI Improvements */}
+                {result.aiAnalysis?.improvements && result.aiAnalysis.improvements.length > 0 && (
+                  <div className="card p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Lightbulb className="w-5 h-5 text-yellow-600" />
+                      <h3 className="font-semibold">AI-Identified Improvements</h3>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      {result.aiAnalysis.improvements.map((imp, i) => (
+                        <div key={i} className="p-4 border border-gray-200 dark:border-zinc-700 rounded-lg">
+                          <div className="flex items-start justify-between gap-3 mb-2">
+                            <h4 className="font-medium">{imp.issue}</h4>
+                            <span className={`text-xs px-2 py-0.5 rounded ${getPriorityColor(imp.priority)}`}>
+                              {imp.priority}
                             </span>
                           </div>
-                          {snippet.suggestion && (
-                            <p className="text-xs text-orange-600 mt-2 flex items-center gap-1">
-                              <Lightbulb className="w-3 h-3" />
-                              {snippet.suggestion}
-                            </p>
+                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">{imp.recommendation}</p>
+                          {imp.exampleFix && (
+                            <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded text-sm">
+                              <span className="text-xs text-green-700 dark:text-green-300 uppercase font-medium">Example fix:</span>
+                              <p className="mt-1 text-green-800 dark:text-green-200">{imp.exampleFix}</p>
+                            </div>
                           )}
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <p className="text-gray-500 text-sm">No strong quotable snippets found. Add specific facts, statistics, or definitions.</p>
-                  )}
-                </div>
-
-                {/* Key Entities */}
-                <div className="card p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Users className="w-5 h-5 text-orange-600" />
-                    <h3 className="font-semibold">Key Entities Detected</h3>
                   </div>
-                  <p className="text-sm text-gray-500 mb-4">
-                    People, organizations, and concepts AI will identify in your content.
-                  </p>
-                  
-                  {result.insights.entities.length > 0 ? (
-                    <div className="flex flex-wrap gap-2">
-                      {result.insights.entities.map((entity, i) => (
-                        <div 
-                          key={i} 
-                          className="px-3 py-1.5 bg-gray-100 dark:bg-zinc-800 rounded-lg text-sm"
-                          title={entity.context}
-                        >
-                          <span className="font-medium">{entity.name}</span>
-                          <span className="text-gray-400 ml-1 text-xs">
-                            ({entity.type} • {entity.mentions}x)
-                          </span>
-                        </div>
-                      ))}
+                )}
+
+                {/* Missing Content */}
+                {result.aiAnalysis?.missingContent && result.aiAnalysis.missingContent.length > 0 && (
+                  <div className="card p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Target className="w-5 h-5 text-red-600" />
+                      <h3 className="font-semibold">Content You Should Add</h3>
                     </div>
-                  ) : (
-                    <p className="text-gray-500 text-sm">No significant entities detected.</p>
-                  )}
-                </div>
-
-                {/* Content Gaps */}
-                <div className="card p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <Target className="w-5 h-5 text-red-600" />
-                    <h3 className="font-semibold">Content Gaps to Fill</h3>
-                  </div>
-                  <p className="text-sm text-gray-500 mb-4">
-                    Missing content types that would improve AI discoverability.
-                  </p>
-                  
-                  {result.insights.contentGaps.length > 0 ? (
-                    <div className="space-y-3">
-                      {result.insights.contentGaps.map((gap, i) => (
+                    
+                    <div className="space-y-4">
+                      {result.aiAnalysis.missingContent.map((content, i) => (
                         <div key={i} className="p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-900">
-                          <div className="flex items-start justify-between gap-2 mb-1">
-                            <h4 className="font-medium text-red-800 dark:text-red-200">{gap.topic}</h4>
-                            <span className={`text-xs px-2 py-0.5 rounded ${
-                              gap.priority === 'high' ? 'bg-red-200 text-red-800' :
-                              gap.priority === 'medium' ? 'bg-yellow-200 text-yellow-800' :
-                              'bg-gray-200 text-gray-600'
-                            }`}>
-                              {gap.priority}
-                            </span>
+                          <h4 className="font-medium text-red-800 dark:text-red-200">{content.topic}</h4>
+                          <p className="text-sm text-red-700 dark:text-red-300 mt-1">{content.reason}</p>
+                          <div className="mt-3 p-3 bg-white dark:bg-zinc-800 rounded">
+                            <span className="text-xs text-gray-500 uppercase">Suggested content:</span>
+                            <p className="text-sm mt-1">{content.suggestedContent}</p>
                           </div>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{gap.reason}</p>
-                          <p className="text-sm text-green-700 dark:text-green-400 flex items-center gap-1">
-                            <Lightbulb className="w-3 h-3" />
-                            {gap.suggestion}
-                          </p>
                         </div>
                       ))}
                     </div>
-                  ) : (
-                    <div className="text-center py-4">
-                      <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
-                      <p className="text-green-600">Great! No major content gaps detected.</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Platform Tips */}
-                <div className="card p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <BookOpen className="w-5 h-5 text-blue-600" />
-                    <h3 className="font-semibold">Platform-Specific Tips</h3>
                   </div>
-                  
-                  <div className="space-y-3">
-                    {result.insights.platformTips.map((tip, i) => (
-                      <div key={i} className={`flex items-start gap-3 p-3 rounded-lg ${
-                        tip.implemented ? 'bg-green-50 dark:bg-green-900/20' : 'bg-gray-50 dark:bg-zinc-800/50'
-                      }`}>
-                        {tip.implemented ? (
-                          <CheckCircle className="w-5 h-5 text-green-500 flex-shrink-0 mt-0.5" />
-                        ) : (
-                          <AlertTriangle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
-                        )}
-                        <div>
-                          <span className={`text-xs px-2 py-0.5 rounded ${
-                            tip.platform === 'All' ? 'bg-purple-100 text-purple-700' :
-                            tip.platform === 'ChatGPT' ? 'bg-green-100 text-green-700' :
-                            tip.platform === 'Perplexity' ? 'bg-blue-100 text-blue-700' :
-                            tip.platform === 'Claude' ? 'bg-orange-100 text-orange-700' :
-                            'bg-red-100 text-red-700'
-                          }`}>
-                            {tip.platform}
-                          </span>
-                          <p className="text-sm mt-1">{tip.tip}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                )}
               </div>
             )}
 
-            {/* Recommendations Tab */}
-            {activeTab === 'recommendations' && (
+            {/* AI Deep Dive Tab */}
+            {activeTab === 'ai-analysis' && (
               <div className="space-y-6">
-                <div className="card p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold">Priority Recommendations</h3>
-                    <span className="text-sm text-gray-500">Showing 3 of {result.allRecommendations.length}</span>
-                  </div>
-                  
-                  <div className="space-y-4">
-                    {result.topRecommendations.slice(0, 3).map((rec, i) => (
-                      <div key={i} className="p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-lg">
-                        <div className="flex items-start gap-3">
-                          <span className={`px-2 py-0.5 text-xs font-medium rounded priority-${rec.priority}`}>
-                            {rec.priority.toUpperCase()}
-                          </span>
-                          <div className="flex-1">
-                            <h4 className="font-medium mb-1">{rec.title}</h4>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{rec.description}</p>
-                            <p className="text-sm text-blue-600 dark:text-blue-400">
-                              <strong>Impact:</strong> {rec.impact}
-                            </p>
+                {/* Rewrite Suggestions */}
+                {result.aiAnalysis?.rewriteSuggestions && result.aiAnalysis.rewriteSuggestions.length > 0 && (
+                  <div className="card p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                      <FileEdit className="w-5 h-5 text-blue-600" />
+                      <h3 className="font-semibold">AI Rewrite Suggestions</h3>
+                    </div>
+                    <p className="text-sm text-gray-500 mb-4">
+                      Claude rewrote these sentences to be more likely to get cited by AI assistants.
+                    </p>
+                    
+                    <div className="space-y-6">
+                      {result.aiAnalysis.rewriteSuggestions.map((rewrite, i) => (
+                        <div key={i} className="border border-gray-200 dark:border-zinc-700 rounded-lg overflow-hidden">
+                          <div className="p-4 bg-red-50 dark:bg-red-900/20 border-b border-gray-200 dark:border-zinc-700">
+                            <div className="flex items-center gap-2 mb-2">
+                              <XCircle className="w-4 h-4 text-red-500" />
+                              <span className="text-xs text-red-600 dark:text-red-400 uppercase font-medium">Original (weak)</span>
+                            </div>
+                            <p className="text-sm text-red-800 dark:text-red-200">&quot;{rewrite.original}&quot;</p>
+                          </div>
+                          <div className="p-4 bg-green-50 dark:bg-green-900/20">
+                            <div className="flex items-center gap-2 mb-2">
+                              <CheckCircle className="w-4 h-4 text-green-500" />
+                              <span className="text-xs text-green-600 dark:text-green-400 uppercase font-medium">Improved (citable)</span>
+                            </div>
+                            <p className="text-sm text-green-800 dark:text-green-200">&quot;{rewrite.improved}&quot;</p>
+                            <p className="text-xs text-gray-600 dark:text-gray-400 mt-2 italic">{rewrite.reason}</p>
                           </div>
                         </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {result.allRecommendations.length > 3 && (
-                    <div className="mt-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-lg">
-                      <div className="flex items-center gap-3">
-                        <Lock className="w-5 h-5 text-blue-600" />
-                        <div className="flex-1">
-                          <p className="font-medium">Unlock {result.allRecommendations.length - 3} more recommendations</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400">Get code examples and detailed fix instructions</p>
-                        </div>
-                        <Link
-                          href="/pricing"
-                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg flex items-center gap-1"
-                        >
-                          <Zap className="w-4 h-4" />
-                          View Plans
-                        </Link>
-                      </div>
+                      ))}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
+
+                {/* No AI Analysis Fallback */}
+                {!result.aiAnalysis && (
+                  <div className="card p-12 text-center">
+                    <Brain className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                    <h3 className="font-medium text-gray-600 mb-2">AI Analysis Not Available</h3>
+                    <p className="text-sm text-gray-500">
+                      Configure your ANTHROPIC_API_KEY to enable Claude-powered analysis.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
-          </div>
-        )}
-
-        {/* Upgrade Modal */}
-        {showUpgradeModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-            <div className="card p-6 max-w-md w-full">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Crown className="w-6 h-6 text-blue-600" />
-                </div>
-                <h3 className="text-xl font-bold mb-2">Pro Feature</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  PDF export requires Pro. Set up Clerk + Stripe to enable payments.
-                </p>
-                
-                <div className="space-y-3">
-                  <Link
-                    href="/pricing"
-                    className="block w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-center"
-                  >
-                    View Pricing
-                  </Link>
-                  <button
-                    onClick={() => setShowUpgradeModal(false)}
-                    className="w-full py-3 border border-gray-300 dark:border-zinc-700 rounded-lg font-medium hover:bg-gray-50 dark:hover:bg-zinc-800"
-                  >
-                    Close
-                  </button>
-                </div>
-              </div>
-            </div>
           </div>
         )}
       </main>

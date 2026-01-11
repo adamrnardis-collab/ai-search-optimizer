@@ -7,6 +7,7 @@
 
 import { JSDOM } from 'jsdom';
 import { Readability } from '@mozilla/readability';
+import { analyzeWithClaude, type AIAnalysis } from './claude-analyzer';
 
 // ============================================
 // Types
@@ -47,26 +48,18 @@ export interface AnalysisResult {
   // All recommendations by category
   allRecommendations: Recommendation[];
   
-  // NEW: Enhanced insights
+  // Rule-based insights
   insights: {
-    // AI Citation Preview - how AI might cite this page
     citationPreviews: CitationPreview[];
-    
-    // Questions this content answers
     questionsAnswered: string[];
-    
-    // Key entities AI will extract
     entities: ExtractedEntity[];
-    
-    // Quotable snippets found
     quotableSnippets: QuotableSnippet[];
-    
-    // Content gaps - topics that should be added
     contentGaps: ContentGap[];
-    
-    // Platform-specific tips
     platformTips: PlatformTip[];
   };
+  
+  // NEW: Claude AI-powered analysis
+  aiAnalysis?: AIAnalysis;
 }
 
 export interface CitationPreview {
@@ -135,7 +128,7 @@ export interface Recommendation {
 // Main Analysis Function
 // ============================================
 
-export async function analyzeUrl(url: string): Promise<AnalysisResult> {
+export async function analyzeUrl(url: string, includeAI: boolean = true): Promise<AnalysisResult> {
   const startTime = Date.now();
   
   // Fetch the page
@@ -172,28 +165,64 @@ export async function analyzeUrl(url: string): Promise<AnalysisResult> {
   // Calculate readability
   const { score: readabilityScore, grade: readabilityGrade } = calculateReadability(textContent);
 
-  // Run all checks
+  // Run all rule-based checks
   const checks = runAllChecks(document, html, textContent, loadTime);
   
   // Calculate category scores
   const categories = calculateCategoryScores(checks);
   
-  // Calculate overall score
+  // Calculate overall score (rule-based)
   const totalScore = Object.values(categories).reduce((sum, cat) => sum + cat.score, 0);
   const maxScore = Object.values(categories).reduce((sum, cat) => sum + cat.maxScore, 0);
-  const score = Math.round((totalScore / maxScore) * 100);
+  let score = Math.round((totalScore / maxScore) * 100);
   
-  // Determine grade
-  const grade = scoreToGrade(score);
-  
-  // Generate recommendations
+  // Generate rule-based recommendations
   const allRecommendations = generateRecommendations(checks);
   const topRecommendations = allRecommendations
     .filter(r => r.priority === 'critical' || r.priority === 'high')
     .slice(0, 5);
 
-  // Generate enhanced insights
+  // Generate rule-based insights
   const insights = generateInsights(document, textContent, title, domain, checks);
+
+  // Extract headings for Claude context
+  const headings = Array.from(document.querySelectorAll('h1, h2, h3'))
+    .map(h => h.textContent?.trim() || '')
+    .filter(h => h.length > 0);
+
+  // Run Claude AI analysis if enabled and API key is configured
+  let aiAnalysis: AIAnalysis | undefined;
+  
+  if (includeAI && process.env.ANTHROPIC_API_KEY) {
+    try {
+      console.log('[Analyzer] Running Claude AI analysis...');
+      aiAnalysis = await analyzeWithClaude(
+        textContent,
+        title,
+        url,
+        {
+          wordCount,
+          hasSchema: checks.find(c => c.id === 'schema-markup')?.passed || false,
+          hasFAQ: checks.find(c => c.id === 'faq-section')?.passed || false,
+          hasAuthor: checks.find(c => c.id === 'author-info')?.passed || false,
+          headings,
+        }
+      );
+      
+      // Blend AI score with rule-based score (60% AI, 40% rules)
+      if (aiAnalysis.aiReadinessScore) {
+        score = Math.round(aiAnalysis.aiReadinessScore * 0.6 + score * 0.4);
+      }
+      
+      console.log('[Analyzer] Claude analysis complete');
+    } catch (error) {
+      console.error('[Analyzer] Claude analysis failed:', error);
+      // Continue without AI analysis
+    }
+  }
+  
+  // Determine grade based on final score
+  const grade = scoreToGrade(score);
 
   return {
     url,
@@ -214,6 +243,7 @@ export async function analyzeUrl(url: string): Promise<AnalysisResult> {
     topRecommendations,
     allRecommendations,
     insights,
+    aiAnalysis,
   };
 }
 
