@@ -26,12 +26,13 @@ const FREE_SCANS_PER_MONTH = parseInt(process.env.FREE_SCANS_PER_MONTH || '3', 1
  */
 export async function getCurrentUser(): Promise<UserData | null> {
   const { userId } = await auth();
-  
+
   if (!userId) {
     return null;
   }
 
-  const user = await clerkClient.users.getUser(userId);
+  const clerk = await clerkClient();
+  const user = await clerk.users.getUser(userId);
   const metadata = (user.publicMetadata || {}) as Record<string, unknown>;
 
   // Check if scans need to be reset (monthly)
@@ -44,7 +45,7 @@ export async function getCurrentUser(): Promise<UserData | null> {
 
   // Update if reset was needed
   if (needsReset) {
-    await clerkClient.users.updateUser(userId, {
+    await clerk.users.updateUser(userId, {
       publicMetadata: {
         ...metadata,
         scansThisMonth: 0,
@@ -97,10 +98,11 @@ export async function canScan(userData: UserData): Promise<{
  * Increment scan count for user
  */
 export async function incrementScanCount(userId: string): Promise<void> {
-  const user = await clerkClient.users.getUser(userId);
+  const clerk = await clerkClient();
+  const user = await clerk.users.getUser(userId);
   const metadata = (user.publicMetadata || {}) as Record<string, unknown>;
 
-  await clerkClient.users.updateUser(userId, {
+  await clerk.users.updateUser(userId, {
     publicMetadata: {
       ...metadata,
       scansThisMonth: ((metadata.scansThisMonth as number) || 0) + 1,
@@ -113,10 +115,11 @@ export async function incrementScanCount(userId: string): Promise<void> {
  * Upgrade user to Pro
  */
 export async function upgradeUserToPro(userId: string, stripeCustomerId: string): Promise<void> {
-  const user = await clerkClient.users.getUser(userId);
+  const clerk = await clerkClient();
+  const user = await clerk.users.getUser(userId);
   const metadata = (user.publicMetadata || {}) as Record<string, unknown>;
 
-  await clerkClient.users.updateUser(userId, {
+  await clerk.users.updateUser(userId, {
     publicMetadata: {
       ...metadata,
       isPro: true,
@@ -129,10 +132,11 @@ export async function upgradeUserToPro(userId: string, stripeCustomerId: string)
  * Downgrade user from Pro
  */
 export async function downgradeUserFromPro(userId: string): Promise<void> {
-  const user = await clerkClient.users.getUser(userId);
+  const clerk = await clerkClient();
+  const user = await clerk.users.getUser(userId);
   const metadata = (user.publicMetadata || {}) as Record<string, unknown>;
 
-  await clerkClient.users.updateUser(userId, {
+  await clerk.users.updateUser(userId, {
     publicMetadata: {
       ...metadata,
       isPro: false,
@@ -144,11 +148,12 @@ export async function downgradeUserFromPro(userId: string): Promise<void> {
  * Save a report ID for user
  */
 export async function saveReport(userId: string, reportId: string): Promise<void> {
-  const user = await clerkClient.users.getUser(userId);
+  const clerk = await clerkClient();
+  const user = await clerk.users.getUser(userId);
   const metadata = (user.publicMetadata || {}) as Record<string, unknown>;
   const savedReports = (metadata.savedReports as string[]) || [];
 
-  await clerkClient.users.updateUser(userId, {
+  await clerk.users.updateUser(userId, {
     publicMetadata: {
       ...metadata,
       savedReports: [...savedReports, reportId].slice(-50), // Keep last 50
