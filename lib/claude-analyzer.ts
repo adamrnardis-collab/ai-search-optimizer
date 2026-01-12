@@ -1,16 +1,8 @@
 /**
  * Claude AI-Powered Analysis
  * 
- * Uses Claude API to provide intelligent content analysis
- * for AI search optimization.
+ * Uses direct HTTP calls to Anthropic API (avoiding SDK issues in serverless)
  */
-
-import Anthropic from '@anthropic-ai/sdk';
-
-// Only initialize if API key exists
-const anthropic = process.env.ANTHROPIC_API_KEY 
-  ? new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-  : null;
 
 export interface AIAnalysis {
   summary: string;
@@ -97,8 +89,9 @@ export async function analyzeWithClaude(
     headings: string[];
   }
 ): Promise<AIAnalysis> {
-  // Check if API is configured
-  if (!anthropic) {
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  
+  if (!apiKey) {
     console.log('[Claude Analysis] No API key configured');
     return createFallbackAnalysis(title, 'Configure ANTHROPIC_API_KEY for AI-powered analysis.');
   }
@@ -183,16 +176,33 @@ Respond with this exact JSON structure (no markdown, just JSON):
 }`;
 
   try {
-    console.log('[Claude Analysis] Calling Claude API...');
+    console.log('[Claude Analysis] Calling Anthropic API...');
     
-    const response = await anthropic.messages.create({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 3000,
-      messages: [{ role: 'user', content: prompt }],
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 3000,
+        messages: [{ role: 'user', content: prompt }],
+      }),
     });
 
-    const textContent = response.content.find(block => block.type === 'text');
-    if (!textContent || textContent.type !== 'text') {
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('[Claude Analysis] API error:', response.status, errorText);
+      throw new Error(`API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    // Extract text from response
+    const textContent = data.content?.find((block: { type: string }) => block.type === 'text');
+    if (!textContent || !textContent.text) {
       throw new Error('No text response from Claude');
     }
 
