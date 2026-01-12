@@ -163,7 +163,7 @@ export async function analyzeUrl(url: string, includeAI: boolean = true): Promis
   const { score: readabilityScore, grade: readabilityGrade } = calculateReadability(textContent);
 
   // Run checks
-  const checks = runAllChecks($, html, textContent, loadTime);
+  const checks = runAllChecks($, html, textContent, loadTime, url);
   
   // Calculate scores
   const categories = calculateCategoryScores(checks);
@@ -286,7 +286,8 @@ function runAllChecks(
   $: cheerio.CheerioAPI,
   html: string,
   textContent: string,
-  loadTime: number
+  loadTime: number,
+  url: string
 ): Check[] {
   const checks: Check[] = [];
   const textLower = textContent.toLowerCase();
