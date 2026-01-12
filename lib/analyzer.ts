@@ -429,7 +429,7 @@ function runAllChecks(
 
   const externalLinks = $('a[href^="http"]').filter((_, el) => {
     const href = $(el).attr('href') || '';
-    return !href.includes(new URL(html).hostname);
+    return !href.includes(new URL(url).hostname);
   }).length;
   checks.push({
     id: 'external-links',
