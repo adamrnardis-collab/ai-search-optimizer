@@ -55,6 +55,16 @@ export default function DashboardPage() {
         body: JSON.stringify({ url: url.trim() }),
       });
 
+      // Check content type before parsing
+      const contentType = response.headers.get('content-type');
+      
+      if (!contentType || !contentType.includes('application/json')) {
+        // Server returned HTML error page
+        const text = await response.text();
+        console.error('Non-JSON response:', text.substring(0, 200));
+        throw new Error('Server error. Please try again in a moment.');
+      }
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -64,7 +74,14 @@ export default function DashboardPage() {
       setResult(data);
       setActiveTab('overview');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Analysis error:', err);
+      const message = err instanceof Error ? err.message : 'An error occurred';
+      // Clean up technical error messages
+      if (message.includes('Unexpected token')) {
+        setError('Server error. The analysis service may be temporarily unavailable. Please try again.');
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
