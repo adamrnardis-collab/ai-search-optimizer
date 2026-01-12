@@ -16,9 +16,10 @@ const isPublicRoute = createRouteMatcher([
   '/api/demo-analyze',
 ]);
 
-export default clerkEnabled ? clerkMiddleware((auth, request) => {
+export default clerkEnabled ? clerkMiddleware(async (auth, request) => {
   if (!isPublicRoute(request)) {
-    auth().protect();
+    const session = await auth();
+    session.protect();
   }
 }) : clerkMiddleware();
 
